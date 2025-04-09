@@ -1,8 +1,9 @@
 import csv
 from datetime import datetime
 
-
 class LogEvent:
+
+    '''Represents a single event from the log file (e.g., a START or END entry)'''
 
     def __init__(self, timestamp, name, event, id):
         self.id = id
@@ -10,8 +11,9 @@ class LogEvent:
         self.event = event.strip()
         self.time = datetime.strptime(timestamp, "%H:%M:%S").time() # parsed timestamp
 
-
 class Job:
+
+    '''Represents a job with name, start and end time (matched by PID)'''
 
     def __init__(self, id):
         self.id = id
@@ -21,13 +23,18 @@ class Job:
 
     def duration(self):
 
+        '''Calculates job duration in seconds, if both times are available'''
+
         if self.start_time and self.end_time:
             start_time_seconds = self.start_time.hour * 3600 + self.start_time.minute * 60 + self.start_time.second
             end_time_seconds = self.end_time.hour * 3600 + self.end_time.minute * 60 + self.end_time.second
             return end_time_seconds - start_time_seconds
         return None # return None if job is incomplete
 
+
 def parse_log(file_path):
+
+    '''Parses the CSV log file into a list of LogEvent objects'''
 
     events = []
     with open(file_path) as f:
@@ -37,6 +44,8 @@ def parse_log(file_path):
     return events
 
 def track_jobs(events):
+
+    '''Groups LogEvents by PID and builds Job objects with start/end times'''
 
     jobs = {}
     for event in events:
@@ -52,6 +61,8 @@ def track_jobs(events):
     return jobs
 
 def analyze_jobs(jobs):
+
+    '''Analyzes job durations and assigns a status: OK, WARNING, ERROR, or RUNNING'''
 
     results = []
     for job in jobs.values():
@@ -69,6 +80,8 @@ def analyze_jobs(jobs):
 
 def print_report(results, output_file="report.log"):
 
+    '''Outputs a report both to the console and to a file'''
+
     lines = []
     for pid, duration, status in results:       # format output depending on job status
         if status == "RUNNING":
@@ -83,8 +96,11 @@ def print_report(results, output_file="report.log"):
     with open(output_file, "w", encoding="utf-8") as f:
         for line in lines:
             f.write(line + "\n")
+    
 
 def main():
+    
+    '''Orchestrates the flow: parse → track → analyze → report'''
 
     file_path = "logs.log"  
     events = parse_log(file_path)  # parse events
@@ -94,5 +110,7 @@ def main():
 
 
 if __name__ == "__main__":
+
+    '''Ensures script only runs when executed directly'''
 
     main()
