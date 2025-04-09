@@ -67,6 +67,23 @@ def analyze_jobs(jobs):
             results.append((job.id, duration, "OK"))
     return results
 
+def print_report(results, output_file="report.log"):
+
+    lines = []
+    for pid, duration, status in results:       # format output depending on job status
+        if status == "RUNNING":
+            line = (f"PID: {pid} | Duration:         | INCOMPLETE (no END)")
+        elif status == "OK":
+            line = (f"PID: {pid} | Duration: {duration:.2f}s")
+        else:
+            line = (f"PID: {pid} | Duration: {duration:.2f}s | {status}")
+        print(line)
+        lines.append(line)
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        for line in lines:
+            f.write(line + "\n")
+
 def main():
 
     file_path = "logs.log"  
