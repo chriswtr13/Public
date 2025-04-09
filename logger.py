@@ -19,6 +19,14 @@ class Job:
         self.start_time = None
         self.end_time = None
 
+    def duration(self):
+
+        if self.start_time and self.end_time:
+            start_time_seconds = self.start_time.hour * 3600 + self.start_time.minute * 60 + self.start_time.second
+            end_time_seconds = self.end_time.hour * 3600 + self.end_time.minute * 60 + self.end_time.second
+            return end_time_seconds - start_time_seconds
+        return None # return None if job is incomplete
+
 def parse_log(file_path):
 
     events = []
@@ -42,6 +50,22 @@ def track_jobs(events):
         elif event.event == "END":
             job.end_time = event.time
     return jobs
+
+def analyze_jobs(jobs):
+
+    results = []
+    for job in jobs.values():
+        duration = job.duration()
+        if duration is None:    # handle jobs that haven't finished
+            results.append((job.id, None, "RUNNING"))
+            continue
+        if duration > 600:      # apply thresholds: 5 min = warning, 10 min = error
+            results.append((job.id, duration, "ERROR"))
+        elif duration > 300:
+            results.append((job.id, duration, "WARNING"))
+        else:
+            results.append((job.id, duration, "OK"))
+    return results
 
 def main():
 
